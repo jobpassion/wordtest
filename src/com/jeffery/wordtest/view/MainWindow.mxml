@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 clipAndEnableScrolling="true"
+		 keyDown="group1_keyDownHandler(event)"
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" creationComplete="group1_creationCompleteHandler(event)">
+	
+	<fx:Style source="style/style.css"/>
+	<s:VGroup horizontalAlign="center" width="100%" id="wordComp" y="-50">
+		
+		<fx:Script>
+			<![CDATA[
+				import mx.core.FlexGlobals;
+				import mx.core.SoundAsset;
+				
+				import spark.components.Application;
+				
+				private var timer:Timer = new Timer(10);
+				private var wordArray:Dictionary = new Dictionary();
+				private var currentWordIdx = 0;
+				private var currentArray;
+				private var corr = 0;
+				private var unCorr = 0;
+				var succSound:Sound = new Sound(new URLRequest("app:/assets/succSound.mp3"));
+				var failSound:Sound = new Sound(new URLRequest("app:/assets/failSound.mp3"));
+				var c:SoundChannel;
+				private var unCorrArr = [];
+				private var speed = 1;
+				protected function group1_creationCompleteHandler(event:FlexEvent):void
+				{
+					// TODO Auto-generated method stub
+					var self:MainWindow = this;
+					timer.addEventListener(TimerEvent.TIMER, function(e:TimerEvent){
+						wordComp.y += speed;
+						if(wordComp.y >= self.height){
+							next();
+						}
+					});
+					var config:File = new File("app:/config/config.txt");
+					var fs:FileStream = new FileStream();
+					fs.open(config, FileMode.READ);
+					var conStr:String = fs.readUTFBytes(fs.bytesAvailable);
+					for each(var cons:String in conStr.split("\n")){
+						if(cons.indexOf('speed=') != -1){
+							speed = 1*Number(cons.substring(6));
+						}
+					}
+						
+					FlexGlobals.topLevelApplication.addEventListener(KeyboardEvent.KEY_UP,group1_keyDownHandler);
+					var lessons = new File('app:/lessons');
+					if(lessons.isDirectory){
+						lessons = lessons.getDirectoryListing();
+						for each(var file:File in lessons){
+							var fs:FileStream = new FileStream();
+							fs.open(file, FileMode.READ);
+							var lines:String = fs.readUTFBytes(fs.bytesAvailable);
+							var arr:Array = []
+							for each(var l:String in lines.split("\n")){
+								if(l.length > 0){
+									arr.push(l);
+								}
+							}
+							if(arr.length > 0)
+								wordArray[file.name] = arr;
+						}
+					}
+					var selector:Selector = new Selector();
+					selector.wordArray = wordArray;
+					this.addElement(selector);
+					selector.addEventListener("select", function(e:DataEvent){
+						currentArray = wordArray[e.data];
+						start();
+						self.removeElement(selector);
+					});
+				}
+				private function start(){
+					timer.start();
+					next();
+				}
+				private function next(){
+					
+					if(currentWordIdx >= currentArray.length){
+						timer.stop();
+						complete();
+						return;
+					}
+					
+					word.text = currentArray[currentWordIdx];
+					currentWordIdx++;
+					wordComp.y = 0;
+				}
+				
+				protected function group1_keyDownHandler(event:KeyboardEvent):void
+				{
+					if(event.keyCode == 13){
+						//true, enter
+						corr++;
+						next();
+						if(c!=null)
+						c.stop();
+						c = succSound.play();
+						
+					}else if(event.keyCode == 32){
+						//false, space
+						unCorrArr.push(currentArray[currentWordIdx - 1]);
+						unCorr++;
+						next();
+						if(c!=null)
+							c.stop();
+						c = failSound.play();
+					}
+				}
+				private function complete(){
+					wordComp.visible = false;
+					var result:Result = new Result();
+					result.corr = this.corr;
+					result.unCorr = this.unCorr;
+					result.unCorrArr = unCorrArr;
+					if(c!=null)
+						c.stop();
+					this.addElement(result);
+				}
+			]]>
+		</fx:Script>
+		
+		<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+		]]>
+	</fx:Script>
+		<s:Label text="TestWord" styleName="Word" id="word"/>
+	</s:VGroup>
+</s:Group>
