@@ -16,13 +16,15 @@
 				import spark.components.Application;
 				
 				private var timer:Timer = new Timer(10);
+				private var minuteTimer:Timer = new Timer(60000);
 				private var wordArray:Dictionary = new Dictionary();
 				private var currentWordIdx = 0;
-				private var currentArray;
+				private var currentArray:Array;
+				private var currentWord;
 				private var corr = 0;
 				private var unCorr = 0;
-				var succSound:Sound = new Sound(new URLRequest("app:/assets/succSound.mp3"));
-				var failSound:Sound = new Sound(new URLRequest("app:/assets/failSound.mp3"));
+				var succSound:Sound = new Sound(new URLRequest("app:/assets/correctSound.mp3"));
+				var failSound:Sound = new Sound(new URLRequest("app:/assets/unCorrectSound.mp3"));
 				var c:SoundChannel;
 				private var unCorrArr = [];
 				private var speed = 1;
@@ -36,6 +38,15 @@
 							next();
 						}
 					});
+					minuteTimer.addEventListener(TimerEvent.TIMER, function(e:TimerEvent){
+						complete();
+					});
+					setup();
+					FlexGlobals.topLevelApplication.addEventListener(KeyboardEvent.KEY_UP,esc);
+				}
+				private function setup(){
+					var self = this;
+					wordArray = new Dictionary();
 					var config:File = new File("app:/config/config.txt");
 					var fs:FileStream = new FileStream();
 					fs.open(config, FileMode.READ);
@@ -45,8 +56,7 @@
 							speed = 1*Number(cons.substring(6));
 						}
 					}
-						
-					FlexGlobals.topLevelApplication.addEventListener(KeyboardEvent.KEY_UP,group1_keyDownHandler);
+					
 					var lessons = new File('app:/lessons');
 					if(lessons.isDirectory){
 						lessons = lessons.getDirectoryListing();
@@ -64,28 +74,40 @@
 								wordArray[file.name] = arr;
 						}
 					}
-					var selector:Selector = new Selector();
+					
+					selector = new Selector();
 					selector.wordArray = wordArray;
 					this.addElement(selector);
 					selector.addEventListener("select", function(e:DataEvent){
 						currentArray = wordArray[e.data];
 						start();
 						self.removeElement(selector);
+						selector = null;
 					});
 				}
+				var selector:Selector;
 				private function start(){
 					timer.start();
+					minuteTimer.start();
 					next();
+					currentWordIdx = 0;
+					corr = 0;
+					unCorr = 0;
+					unCorrArr = [];
+					FlexGlobals.topLevelApplication.addEventListener(KeyboardEvent.KEY_UP,group1_keyDownHandler);
+					wordComp.visible = true;
 				}
 				private function next(){
 					
-					if(currentWordIdx >= currentArray.length){
+					if(currentArray.length == 0){
 						timer.stop();
 						complete();
 						return;
 					}
-					
-					word.text = currentArray[currentWordIdx];
+					var ran = Math.random()*(currentArray.length - 1);
+					ran = Math.round(ran);
+					word.text = currentArray.splice(ran, 1)[0];
+					currentWord = word.text;
 					currentWordIdx++;
 					wordComp.y = 0;
 				}
@@ -102,7 +124,7 @@
 						
 					}else if(event.keyCode == 32){
 						//false, space
-						unCorrArr.push(currentArray[currentWordIdx - 1]);
+						unCorrArr.push(currentWord);
 						unCorr++;
 						next();
 						if(c!=null)
@@ -110,14 +132,40 @@
 						c = failSound.play();
 					}
 				}
-				private function complete(){
+				private function esc(event:KeyboardEvent){
+					if(event.keyCode != 27){
+						return;
+					}
+					if(selector)
+						return;
+					FlexGlobals.topLevelApplication.removeEventListener(KeyboardEvent.KEY_UP,group1_keyDownHandler);
 					wordComp.visible = false;
-					var result:Result = new Result();
+					if(c!=null){
+						c.stop();
+						c = null;
+					}
+					minuteTimer.reset();
+					timer.reset();
+					setup();
+					if(result){
+						this.removeElement(result);
+						result = null;
+					}
+				}
+				var result:Result;
+				private function complete(){
+					FlexGlobals.topLevelApplication.removeEventListener(KeyboardEvent.KEY_UP,group1_keyDownHandler);
+					wordComp.visible = false;
+					result = new Result();
 					result.corr = this.corr;
 					result.unCorr = this.unCorr;
 					result.unCorrArr = unCorrArr;
-					if(c!=null)
+					minuteTimer.reset();
+					timer.reset();
+					if(c!=null){
 						c.stop();
+						c = null;
+					}
 					this.addElement(result);
 				}
 			]]>

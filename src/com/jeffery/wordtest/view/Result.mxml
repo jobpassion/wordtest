@@ -6,12 +6,22 @@
 		<![CDATA[
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
+			import mx.validators.EmailValidator;
 			
 			public var corr;
 			public var unCorr;
-			var bestSound:Sound = new Sound(new URLRequest("app:/assets/best.mp3"));
-			var goodSound:Sound = new Sound(new URLRequest("app:/assets/good.mp3"));
-			var badSound:Sound = new Sound(new URLRequest("app:/assets/bad.mp3"));
+			var perfectSound:Sound = new Sound(new URLRequest("app:/assets/perfectSound.mp3"));
+			var goodSound:Sound = new Sound(new URLRequest("app:/assets/goodSound.mp3"));
+			var okSound:Sound = new Sound(new URLRequest("app:/assets/okSound.mp3"));
+			var failSound:Sound = new Sound(new URLRequest("app:/assets/failSound.mp3"));
+			[Embed(source="app:/assets/perfectImage.jpg")]
+			private var perfectImage:Class;
+			[Embed(source="app:/assets/goodImage.jpg")]
+			private var goodImage:Class;
+			[Embed(source="app:/assets/okImage.jpg")]
+			private var okImage:Class;
+			[Embed(source="app:/assets/failImage.jpg")]
+			private var failImage:Class;
 			public var unCorrArr = [];
 			
 			protected function group1_creationCompleteHandler(event:FlexEvent):void
@@ -20,16 +30,22 @@
 				corrLabel.text = '正确:' + corr;
 				unCorrLabel.text = '错误:' + unCorr;
 				var _result = corr / (corr + unCorr);
-				if(_result >= 0.9){
-					bestSound.play();
-				}else if(_result >= 0.6){
+				if(unCorr == 0){
+					perfectSound.play();
+					image.source = perfectImage;
+				}else if(unCorr <= 3){
 					goodSound.play();
+					image.source = goodImage;
+				}else if(unCorr <= 6){
+					okSound.play();
+					image.source = okImage;
 				}else{
-					badSound.play();
+					failSound.play();
+					image.source = failImage;
 				}
 				_result = (_result + '').substr(0, 4);
 				_result = (_result * 1) * 100 + '%'
-				result.text = '正确率:' + _result;
+				//result.text = '正确率:' + _result;
 			}
 			
 			protected function label1_clickHandler(event:MouseEvent):void
@@ -50,8 +66,9 @@
 				<s:Label text="结果统计" fontSize="50" styleName="Word"/>
 				<s:Label id="corrLabel" text="正确:10" fontSize="30" styleName="Word"/>
 				<s:Label id="unCorrLabel" text="错误:10" fontSize="30" styleName="Word"/>
-				<s:Label id="result" text="正确率:100%" fontSize="40" styleName="Word"/>
+				<s:Label id="result" text="正确率:100%" fontSize="40" styleName="Word" visible="false"/>
 				<s:Label text="点击这里查看错误单词" color="0xffffff" fontSize="20" click="label1_clickHandler(event)"/>
+				<s:Image id="image" height="200"/>
 			</s:VGroup>
 	</s:HGroup>
 </s:Group>
