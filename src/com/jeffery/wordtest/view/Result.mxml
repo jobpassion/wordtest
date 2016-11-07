@@ -7,20 +7,20 @@
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
 			import mx.validators.EmailValidator;
-			
+
 			public var corr;
 			public var unCorr;
 			var perfectSound:Sound = new Sound(new URLRequest("app:/assets/perfectSound.mp3"));
 			var goodSound:Sound = new Sound(new URLRequest("app:/assets/goodSound.mp3"));
 			var okSound:Sound = new Sound(new URLRequest("app:/assets/okSound.mp3"));
 			var failSound:Sound = new Sound(new URLRequest("app:/assets/failSound.mp3"));
-			[Embed(source="app:/assets/perfectImage.jpg")]
+			[Embed(source="assets/perfectImage.jpg")]
 			private var perfectImage:Class;
-			[Embed(source="app:/assets/goodImage.jpg")]
+			[Embed(source="assets/goodImage.jpg")]
 			private var goodImage:Class;
-			[Embed(source="app:/assets/okImage.jpg")]
+			[Embed(source="assets/okImage.jpg")]
 			private var okImage:Class;
-			[Embed(source="app:/assets/failImage.jpg")]
+			[Embed(source="assets/failImage.jpg")]
 			private var failImage:Class;
 			public var unCorrArr = [];
 			
