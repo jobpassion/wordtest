@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:local="*"
 		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" creationComplete="group1_creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
@@ -14,14 +15,14 @@
 			var goodSound:Sound = new Sound(new URLRequest("app:/assets/goodSound.mp3"));
 			var okSound:Sound = new Sound(new URLRequest("app:/assets/okSound.mp3"));
 			var failSound:Sound = new Sound(new URLRequest("app:/assets/failSound.mp3"));
-			[Embed(source="assets/perfectImage.jpg")]
-			private var perfectImage:Class;
-			[Embed(source="assets/goodImage.jpg")]
-			private var goodImage:Class;
-			[Embed(source="assets/okImage.jpg")]
-			private var okImage:Class;
-			[Embed(source="assets/failImage.jpg")]
-			private var failImage:Class;
+//			[source="assets/perfectImage.jpg"]
+//			private var perfectImage:Class;
+//			[Embed(source="assets/goodImage.jpg")]
+//			private var goodImage:Class;
+//			[Embed(source="assets/okImage.jpg")]
+//			private var okImage:Class;
+//			[Embed(source="assets/failImage.jpg")]
+//			private var failImage:Class;
 			public var unCorrArr = [];
 			
 			protected function group1_creationCompleteHandler(event:FlexEvent):void
@@ -32,16 +33,16 @@
 				var _result = corr / (corr + unCorr);
 				if(unCorr == 0){
 					perfectSound.play();
-					image.source = perfectImage;
+					image.source = "assets/perfectImage.jpg";
 				}else if(unCorr <= 3){
 					goodSound.play();
-					image.source = goodImage;
+					image.source = "assets/goodImage.jpg";
 				}else if(unCorr <= 6){
 					okSound.play();
-					image.source = okImage;
+					image.source = "assets/okImage.jpg";
 				}else{
 					failSound.play();
-					image.source = failImage;
+					image.source = "assets/failImage.jpg";
 				}
 				_result = (_result + '').substr(0, 4);
 				_result = (_result * 1) * 100 + '%'
@@ -68,7 +69,7 @@
 				<s:Label id="unCorrLabel" text="错误:10" fontSize="30" styleName="Word"/>
 				<s:Label id="result" text="正确率:100%" fontSize="40" styleName="Word" visible="false"/>
 				<s:Label text="点击这里查看错误单词" color="0xffffff" fontSize="20" click="label1_clickHandler(event)"/>
-				<s:Image id="image" height="200"/>
+				<local:AnimatedGIFImage id="image" source="assets/perfectImage.jpg" height="200"/>
 			</s:VGroup>
 	</s:HGroup>
 </s:Group>
