@@ -117,7 +117,7 @@
 				
 				protected function group1_keyDownHandler(event:KeyboardEvent):void
 				{
-					if(event.keyCode == 13){
+					if(event.keyCode == 13 || event.keyCode == 34){
 						//true, enter
 						corr++;
 						next();
@@ -125,7 +125,7 @@
 						c.stop();
 						c = succSound.play();
 						
-					}else if(event.keyCode == 32){
+					}else if(event.keyCode == 32 || event.keyCode == 33){
 						//false, space
 //						unCorrArr.push(currentWord);
 //						unCorr++;
